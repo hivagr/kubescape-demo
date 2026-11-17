@@ -1,0 +1,172 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kubescape-scan-now
+  namespace: kubescape
+  labels:
+    app: kubescape-scheduler
+    app.kubernetes.io/component: kubescape-scheduler
+    app.kubernetes.io/instance: kubescape
+    app.kubernetes.io/name: kubescape-operator
+    app.kubernetes.io/part-of: kubescape
+    app.kubernetes.io/version: 1.42.1
+    armo.tier: kubescape-scan
+    helm.sh/chart: kubescape-operator-1.42.1
+    kubescape.io/ignore: "true"
+    kubescape.io/tier: core
+    tier: ks-control-plane
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: kubescape-scheduler
+        app.kubernetes.io/component: kubescape-scheduler
+        app.kubernetes.io/instance: kubescape
+        app.kubernetes.io/name: kubescape-operator
+        app.kubernetes.io/part-of: kubescape
+        app.kubernetes.io/version: 1.42.1
+        armo.tier: kubescape-scan
+        helm.sh/chart: kubescape-operator-1.42.1
+        kubescape.io/ignore: "true"
+        kubescape.io/tier: core
+        tier: ks-control-plane
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - name: kubescape-scheduler
+        image: quay.io/kubescape/kubescape-ops-tool:0.2.0-r1
+        imagePullPolicy: IfNotPresent
+        command: ["/usr/bin/kubescape-ops-tool", "create-operator-command"]
+        args:
+        - --namespace
+        - kubescape
+        - --request-body
+        - /home/ks/request-body.json
+        - --generate-name
+        - kubescape-scheduler-
+        env:
+        - name: JOB_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['batch.kubernetes.io/job-name']
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+        volumeMounts:
+        - mountPath: /home/ks/request-body.json
+          name: kubescape-scheduler
+          readOnly: true
+          subPath: request-body.json
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: Never
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: kubescape
+      volumes:
+      - configMap:
+          name: kubescape-scheduler
+        name: kubescape-scheduler
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vuln-scan-now
+  namespace: kubescape
+  labels:
+    app: kubevuln-scheduler
+    app.kubernetes.io/component: kubevuln-scheduler
+    app.kubernetes.io/instance: kubescape
+    app.kubernetes.io/name: kubescape-operator
+    app.kubernetes.io/part-of: kubescape
+    app.kubernetes.io/version: 1.42.1
+    armo.tier: vuln-scan
+    helm.sh/chart: kubescape-operator-1.42.1
+    kubescape.io/ignore: "true"
+    kubescape.io/tier: core
+    tier: ks-control-plane
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: kubevuln-scheduler
+        app.kubernetes.io/component: kubevuln-scheduler
+        app.kubernetes.io/instance: kubescape
+        app.kubernetes.io/name: kubescape-operator
+        app.kubernetes.io/part-of: kubescape
+        app.kubernetes.io/version: 1.42.1
+        armo.tier: vuln-scan
+        helm.sh/chart: kubescape-operator-1.42.1
+        kubescape.io/ignore: "true"
+        kubescape.io/tier: core
+        tier: ks-control-plane
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - name: kubevuln-scheduler
+        image: quay.io/kubescape/kubescape-ops-tool:0.2.0-r1
+        imagePullPolicy: IfNotPresent
+        command: ["/usr/bin/kubescape-ops-tool", "create-operator-command"]
+        args:
+        - --namespace
+        - kubescape
+        - --request-body
+        - /home/ks/request-body.json
+        - --generate-name
+        - kubevuln-scheduler-
+        env:
+        - name: JOB_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['batch.kubernetes.io/job-name']
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
+        volumeMounts:
+        - mountPath: /home/ks/request-body.json
+          name: kubevuln-scheduler
+          readOnly: true
+          subPath: request-body.json
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: Never
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: kubevuln
+      volumes:
+      - configMap:
+          name: kubevuln-scheduler
+        name: kubevuln-scheduler

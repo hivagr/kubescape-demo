@@ -1,0 +1,86 @@
+---
+clusterName: kubescape-demo
+
+# Helm values for the kubescape-operator chart (chart: kubescape-operator).
+# Chart source: https://github.com/kubescape/helm-charts
+# Capabilities reference: https://kubescape.io/docs/operator/capabilities/
+capabilities:
+  # Scans cluster resources (workloads, RBAC, network, secrets, ...) against
+  # framework controls to find misconfigurations.
+  configurationScan: enable
+
+  # Continuous Scanning continuously evaluates the security posture of your cluster.
+  continuousScan: enable
+
+  # Deploys the node-agent DaemonSet which scans node-level configuration
+  # and collects node info (also required for SBOM and runtime/eBPF features).
+  nodeScan: enable
+
+  # The node-agent generates an SBOM (Software Bill of Materials) of each node,
+  # used to vulnerability-scan the node image itself.
+  nodeSbomGeneration: enable
+
+  # Scans running container images for CVEs using the kubevuln component.
+  vulnerabilityScan: enable
+
+  # Kubescape relevancy analysis: reports only vulnerabilities that are
+  # actually reachable given how the image is built/run (significantly
+  # reduces false positives).
+  relevancy: disable
+
+  # Generate VEX documents alongside the image vulnerabilities report (experimental)
+  vexGeneration: disable
+
+  # eBPF-based runtime observability (network/DNS and other telemetry
+  # collected by node-agent sensors).
+  runtimeObservability: disable
+
+  # Builds recommended NetworkPolicies from observed runtime traffic.
+  networkPolicyService: disable
+
+  # Detects threats in running workloads (suspicious exec, shell access, ...)
+  # and raises runtime alerts.
+  runtimeDetection: disable
+
+  # Scans nodes/images for malware using the node-agent.
+  malwareDetection: disable
+
+  # Profiles executables/processes running on each node (feeds exec-policy
+  # recommendations and workload inventory).
+  nodeProfileService: disable
+
+  # Generates seccomp profiles per workload from observed syscalls.
+  seccompProfileService: disable
+
+  # Enables the risk engine / risk view: aggregates vulnerabilities and
+  # misconfigurations into per-resource risk scores and backs the
+  # risk-acceptance records (SecurityException CRDs).
+  riskAcceptance: enable
+
+  # This is an experimental capability with an elevated security risk. Read the
+  # matching docs before enabling.
+  # Lets the operator automatically keep its deployed components up to date.
+  autoUpgrading: disable
+
+  # Deploys the prometheus-exporter component which exposes scan results as
+  # Prometheus metrics (tuned in the prometheusExporter section below).
+  prometheusExporter: disable
+
+  # seccompGenerator: disable  # old name, replaced by seccompProfileService
+
+certificates:
+  # How certificates for the admission webhook and storage mTLS endpoints are
+  # created. 'initContainer' generates them at pod start instead of during Helm
+  # templating - required for ArgoCD/GitOps, since re-rendering the chart would
+  # otherwise regenerate (and break) the certs on every sync.
+  strategy: initContainer
+
+# Compliance frameworks installed by default; configuration scans run against
+# these (CIS benchmarks, NSA guidelines, MITRE ATT&CK mapping, best-practice sets).
+defaultFrameworks: ["cis-v1.10.0", "nsa", "mitre", "DevOpsBest", "ArmoBest"]
+
+#global:
+#  overrideRuntimePath: /host/usr/local/sbin/runc
+#  overrideSocketPath: /host/usr/local/sbin/runc
+storage:
+  enabled: true

@@ -1,0 +1,33 @@
+---
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: headlamp
+    url: https://kubernetes-sigs.github.io/headlamp
+  - name: kubescape
+    url: https://kubescape.github.io/helm-charts
+
+releases:
+  - name: traefik
+    namespace: networking
+    createNamespace: true
+    chart: traefik/traefik
+    version: 42.4.0
+    values:
+      - traefik/values.yaml
+
+  - name: headlamp
+    namespace: headlamp
+    createNamespace: true
+    chart: headlamp/headlamp
+    version: 0.46.0
+    values:
+      - headlamp/values.yaml
+
+  - name: kubescape
+    namespace: kubescape
+    createNamespace: true
+    chart: kubescape/kubescape-operator
+    version: 1.42.0
+    values:
+      - kubescape/values.yaml

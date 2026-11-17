@@ -1,0 +1,43 @@
+---
+deployment:
+  replicas: 1
+
+# service:
+#   type: NodePort
+#
+ports:
+  web:
+    nodePort: 30080
+  websecure:
+    nodePort: 30443
+
+nodeSelector:
+  ingress-ready: "true"
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Equal
+    effect: NoSchedule
+
+# logs:
+#   access:
+#     enabled: true
+#     addInternals: true
+#     format: json
+#     fields:
+#       general:
+#         defaultMode: keep
+#       headers:
+#         defaultMode: drop
+#         names:
+#           User-Agent: keep
+#           Content-Type: keep
+#           Accept: keep
+#           Referer: keep
+#           X-Forwarded-For: keep
+#           X-Forwarded-Proto: keep
+#           X-Forwarded-Host: keep
+#           X-Real-Ip: keep
+#           X-Request-Id: keep
+#           Host: keep
+#           Authorization: redact
